@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import platform
 from pathlib import Path
+import os
+import requests
 
 # -----------------------------------
 # 페이지 설정
@@ -62,22 +64,39 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -----------------------------------
-# 한글 폰트 설정
-# Streamlit Cloud 대응
+# 한글 폰트 자동 다운로드
 # -----------------------------------
-font_path = "fonts/NanumGothic.ttf"
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+import requests
+import os
 
-if Path(font_path).exists():
-    fontprop = fm.FontProperties(fname=font_path)
-    plt.rc('font', family=fontprop.get_name())
-else:
-    if platform.system() == 'Windows':
-        plt.rc('font', family='Malgun Gothic')
-    elif platform.system() == 'Darwin':
-        plt.rc('font', family='AppleGothic')
-    else:
-        plt.rc('font', family='DejaVu Sans')
+# -----------------------------------
+# 한글 폰트 자동 다운로드
+# -----------------------------------
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+import requests
+import os
 
+FONT_URL = "https://github.com/google/fonts/raw/main/ofl/nanumgothic/NanumGothic-Regular.ttf"
+FONT_PATH = "NanumGothic-Regular.ttf"
+
+# 폰트가 없을 때만 다운로드
+if not os.path.exists(FONT_PATH):
+
+    response = requests.get(FONT_URL)
+
+    if response.status_code == 200:
+        with open(FONT_PATH, "wb") as f:
+            f.write(response.content)
+
+# 폰트 등록
+fm.fontManager.addfont(FONT_PATH)
+
+font_prop = fm.FontProperties(fname=FONT_PATH)
+
+plt.rcParams['font.family'] = font_prop.get_name()
 plt.rcParams['axes.unicode_minus'] = False
 
 # -----------------------------------
@@ -206,11 +225,23 @@ if st.button("🔍 군집 예측 시작"):
         <h2 style="color:#4F8BF9;">
             예측 결과: {cluster_num}번 군집
         </h2>
-        <h3>
-            🩺 {cluster_result}
-        </h3>
+        <h3 style="color:#222222;">
+    🩺 {cluster_result}
+</h3>
     </div>
     """, unsafe_allow_html=True)
+
+    plt.style.use('dark_background')
+
+    fig, ax = plt.subplots(figsize=(10, 7))
+
+    fig.patch.set_facecolor('#0E1117')
+    ax.set_facecolor('#262730')
+
+    plt.style.use('default')
+
+    fig.patch.set_facecolor('white')
+    ax.set_facecolor('white')
 
     # -----------------------------------
     # 시각화
