@@ -62,15 +62,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -----------------------------------
-# matplotlib 한글 폰트 설정
-# -----------------------------------
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
-import requests
-import os
-
-# -----------------------------------
 # 군집 이름
 # -----------------------------------
 cluster_names = {
@@ -133,19 +124,19 @@ with col2:
 
     if input_mode == "게이지바 조절":
         smokes = st.slider(
-            "흡연 여부",
-            0.0,
-            1.0,
-            0.0,
-            step=0.1
+            "흡연량",
+            0,
+            50,
+            0,
+            step=1
         )
     else:
         smokes = st.number_input(
-            "흡연 여부 입력",
-            min_value=0.0,
-            max_value=1.0,
-            value=0.0,
-            step=0.1
+            "흡연량 입력",
+            min_value=0,
+            max_value=50,
+            value=0,
+            step=1
         )
 
     st.markdown('</div>', unsafe_allow_html=True)
@@ -201,16 +192,6 @@ if st.button("🔍 군집 예측 시작"):
 </h3>
     </div>
     """, unsafe_allow_html=True)
-
-    # -----------------------------------
-    # 시각화
-    # -----------------------------------
-    plt.style.use('default')
-
-    fig, ax = plt.subplots(figsize=(10, 7))
-
-    fig.patch.set_facecolor('white')
-    ax.set_facecolor('white')
 
 # -----------------------------------
 # Plotly 시각화
