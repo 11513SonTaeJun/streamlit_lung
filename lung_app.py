@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import joblib
-import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
 import platform
 from pathlib import Path
 import os
@@ -64,40 +62,13 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -----------------------------------
-# 한글 폰트 자동 다운로드
+# matplotlib 한글 폰트 설정
 # -----------------------------------
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import requests
 import os
-
-# -----------------------------------
-# 한글 폰트 자동 다운로드
-# -----------------------------------
-import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
-import requests
-import os
-
-FONT_URL = "https://github.com/google/fonts/raw/main/ofl/nanumgothic/NanumGothic-Regular.ttf"
-FONT_PATH = "NanumGothic-Regular.ttf"
-
-# 폰트가 없을 때만 다운로드
-if not os.path.exists(FONT_PATH):
-
-    response = requests.get(FONT_URL)
-
-    if response.status_code == 200:
-        with open(FONT_PATH, "wb") as f:
-            f.write(response.content)
-
-# 폰트 등록
-fm.fontManager.addfont(FONT_PATH)
-
-font_prop = fm.FontProperties(fname=FONT_PATH)
-
-plt.rcParams['font.family'] = font_prop.get_name()
-plt.rcParams['axes.unicode_minus'] = False
 
 # -----------------------------------
 # 군집 이름
@@ -231,49 +202,59 @@ if st.button("🔍 군집 예측 시작"):
     </div>
     """, unsafe_allow_html=True)
 
-    plt.style.use('dark_background')
+    # -----------------------------------
+    # 시각화
+    # -----------------------------------
+    plt.style.use('default')
 
     fig, ax = plt.subplots(figsize=(10, 7))
-
-    fig.patch.set_facecolor('#0E1117')
-    ax.set_facecolor('#262730')
-
-    plt.style.use('default')
 
     fig.patch.set_facecolor('white')
     ax.set_facecolor('white')
 
-    # -----------------------------------
-    # 시각화
-    # -----------------------------------
-    fig, ax = plt.subplots(figsize=(10, 7))
+# -----------------------------------
+# Plotly 시각화
+# -----------------------------------
+import plotly.express as px
 
-    scatter = ax.scatter(
-        df['나이'],
-        df['흡연 여부'],
-        c=df['cluster'],
-        cmap='viridis',
-        alpha=0.6,
-        s=70
+# 기존 데이터 시각화
+fig = px.scatter(
+    df,
+    x='나이',
+    y='흡연 여부',
+    color=df['cluster'].astype(str),
+    color_discrete_sequence=px.colors.qualitative.Vivid,
+    title='폐 건강 군집 시각화',
+    labels={
+        '나이': '나이',
+        '흡연 여부': '흡연 여부',
+        'color': '군집'
+    }
+)
+
+# 새 환자 추가
+fig.add_scatter(
+    x=[age],
+    y=[smokes],
+    mode='markers',
+    marker=dict(
+        size=20,
+        color='red',
+        symbol='x'
+    ),
+    name='새 환자'
+)
+
+# UI 스타일
+fig.update_layout(
+    template='plotly_white',
+    height=700,
+    title_font_size=24,
+    font=dict(
+        family='Arial',
+        size=14
     )
+)
 
-    # 새 환자 표시
-    ax.scatter(
-        age,
-        smokes,
-        c='red',
-        s=350,
-        marker='X',
-        edgecolors='black',
-        linewidths=2,
-        label='새 환자'
-    )
-
-    ax.set_xlabel('나이', fontsize=13)
-    ax.set_ylabel('흡연 여부', fontsize=13)
-    ax.set_title('폐 건강 군집 시각화', fontsize=18, weight='bold')
-
-    ax.grid(alpha=0.3)
-    ax.legend()
-
-    st.pyplot(fig)
+# 출력
+st.plotly_chart(fig, use_container_width=True)
